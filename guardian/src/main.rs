@@ -50,6 +50,7 @@ async fn main() -> std::io::Result<()>{
                                 match result{
                                     Ok(_)=> {
                                         println!("The socket is shutting down");
+                                        break;
                                     }
                                     Err(error) => {
                                         eprintln!("The socket can't be shut down {}", error)
@@ -58,7 +59,6 @@ async fn main() -> std::io::Result<()>{
                             }
                             _ => {
                                 send_message(&mut stream, "Not a valid option").await;
-                                break;
                             }
 
                         }
