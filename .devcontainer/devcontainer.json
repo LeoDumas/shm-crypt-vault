@@ -1,0 +1,36 @@
+{
+  "name": "Aegis Bridge Dev Env",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Extensions C++
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        // Extensions Rust
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "serayuzgur.crates",
+        // Outils communs
+        "zxh404.vscode-proto3",      // Pour Protobuf
+        "vadimcn.vscode-lldb"        // Débogueur puissant pour C++ et Rust
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "cmake.configureOnOpen": true,
+        "rust-analyzer.linkedProjects": [
+          "./guardian/Cargo.toml"
+        ]
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  // Crucial pour ton projet : autorise la mémoire partagée et le debugging avancé
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt", "seccomp=unconfined",
+    "--ipc=shareable" 
+  ]
+}
