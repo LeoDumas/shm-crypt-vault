@@ -1,6 +1,9 @@
 use tokio::{self, io::{AsyncReadExt, AsyncWriteExt}, net::{UnixListener, UnixStream}};
 use std::{env, fs, path::PathBuf};
 
+mod cryptography;
+use cryptography::cipher;
+
 async fn send_message(stream: &mut UnixStream, message_to_send: &str)-> u8{
     if let Err(_) = stream.write_all(message_to_send.as_bytes()).await {
         return 0;
@@ -11,6 +14,21 @@ async fn send_message(stream: &mut UnixStream, message_to_send: &str)-> u8{
 // Create Unix domain socket
 #[tokio::main]
 async fn main() -> std::io::Result<()>{
+
+    cipher::check_openssl_version();
+
+    cipher::check_openssl_version_2();
+
+    let result = cipher::generate_aes_key(128);
+    let _ = match result{
+        Ok(val)=>{
+            let hex_string: String = val.iter().map(|b| format!("{:02x}", b)).collect();
+            println!("Key (HEX): {}", hex_string);
+        }
+        Err(error)=>{
+            eprintln!("Error while creating the key: {}", error);
+        }
+    };
 
     // Get the path needed to create the socket
     let runtime_path: String = env::var("XDG_RUNTIME_DIR").expect("XDG_RUNTIME_DIR is not set");
