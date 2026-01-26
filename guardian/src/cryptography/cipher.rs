@@ -1,22 +1,22 @@
 use std::fmt;
-use std::{env, u8};
 use std::process::Command;
+use std::{env, u8};
 
-pub enum AESError {
+pub enum CipherError{
     InvalidKeySize,
     ExternalLibError,
 }
 
-impl fmt::Display for AESError {
+impl fmt::Display for CipherError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self{
-            AESError::InvalidKeySize=>write!(f,"The required key size in bits is incorrect"),
-            AESError::ExternalLibError=>write!(f,"Error while generating the AES Key"),
+        match self {
+            CipherError::InvalidKeySize => write!(f, "The required key size in bits is incorrect"),
+            CipherError::ExternalLibError => write!(f, "External library error"),
         }
     }
 }
 
-pub fn check_openssl_version()->bool{
+pub fn check_openssl_version() -> bool {
     if let Ok(version) = env::var("DEP_OPENSSL_VERSION_NUMBER") {
         println!("Current installation: {}", version);
         return true;
@@ -25,7 +25,7 @@ pub fn check_openssl_version()->bool{
     return false;
 }
 
-pub fn check_openssl_version_2() -> bool{
+pub fn check_openssl_version_2() -> bool {
     let openssl_version = Command::new("sh")
         .arg("-c")
         .arg("openssl version")
@@ -41,17 +41,28 @@ pub fn check_openssl_version_2() -> bool{
     return false;
 }
 
-pub fn generate_aes_key(bits: u16) -> Result<Vec<u8>, AESError>{
-    let lenght = match bits{
+pub fn generate_aes_key(bits: u16) -> Result<Vec<u8>, CipherError> {
+    let lenght = match bits {
         128 => 16,
         192 => 24,
         256 => 32,
-        _ => return Err(AESError::InvalidKeySize)
+        _ => return Err(CipherError::InvalidKeySize),
     };
 
     let mut buffer = vec![0u8; lenght];
 
-    openssl::rand::rand_bytes(&mut buffer).map_err(|_| AESError::ExternalLibError)?;
+    openssl::rand::rand_bytes(&mut buffer).map_err(|_| CipherError::ExternalLibError)?;
 
     Ok(buffer)
+}
+
+// pub fn generate_random_iv() -> Result<Vec<u8>, CipherError> {
+//     let mut iv = vec![0u8, 32];
+//     openssl::rand::rand_bytes(&mut iv).map_err(|_| CipherError::ExternalLibError)?;
+
+//     Ok(iv)
+// }
+
+pub fn convert_hex_to_string(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{:02x}", b)).collect()
 }

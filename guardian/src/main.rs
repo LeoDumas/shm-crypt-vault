@@ -14,21 +14,11 @@ async fn send_message(stream: &mut UnixStream, message_to_send: &str)-> u8{
 // Create Unix domain socket
 #[tokio::main]
 async fn main() -> std::io::Result<()>{
-
-    cipher::check_openssl_version();
-
-    cipher::check_openssl_version_2();
-
-    let result = cipher::generate_aes_key(128);
-    let _ = match result{
-        Ok(val)=>{
-            let hex_string: String = val.iter().map(|b| format!("{:02x}", b)).collect();
-            println!("Key (HEX): {}", hex_string);
-        }
-        Err(error)=>{
-            eprintln!("Error while creating the key: {}", error);
-        }
-    };
+    
+    // if !cipher::check_openssl_version() || !cipher::check_openssl_version_2(){
+    //     println!("OpenSSL isn't installed in the Guardian part");
+    //     return Ok(())
+    // }
 
     // Get the path needed to create the socket
     let runtime_path: String = env::var("XDG_RUNTIME_DIR").expect("XDG_RUNTIME_DIR is not set");
@@ -62,6 +52,19 @@ async fn main() -> std::io::Result<()>{
                             }
                             "ping" => {
                                 send_message(&mut stream, "pong").await;
+                            }
+                            "gen_key" => {
+                                match cipher::generate_aes_key(256) {
+                                    Ok(key_bytes) => {
+                                        let value_string = cipher::convert_hex_to_string(&key_bytes);
+                                        println!("Generated Key: {}", value_string);
+                                        send_message(&mut stream, &format!("Key: {}", value_string)).await;
+                                    }
+                                    Err(e) => {
+                                        eprintln!("Key generation failed: {}", e);
+                                        send_message(&mut stream, "Error: Failed to generate key").await;
+                                    }
+                                }
                             }
                             "finish" => {
                                 let result: Result<(), std::io::Error> = stream.shutdown().await;
