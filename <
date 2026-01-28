@@ -8,17 +8,17 @@ async fn send_message(stream: &mut UnixStream, message_to_send: &str)-> u8{
     if (stream.write_all(message_to_send.as_bytes()).await).is_err() {
         return 0;
     }
-    1
+    return 1;
 }
 
 // Create Unix domain socket
 #[tokio::main]
 async fn main() -> std::io::Result<()>{
     
-    if !cipher::check_openssl_version() || !cipher::check_openssl_version_2(){
-        println!("OpenSSL isn't installed in the Guardian part");
-        return Ok(())
-    }
+    // if !cipher::check_openssl_version() || !cipher::check_openssl_version_2(){
+    //     println!("OpenSSL isn't installed in the Guardian part");
+    //     return Ok(())
+    // }
 
     // Get the path needed to create the socket
     let runtime_path: String = env::var("XDG_RUNTIME_DIR").expect("XDG_RUNTIME_DIR is not set");

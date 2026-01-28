@@ -1,6 +1,6 @@
 use std::fmt;
 use std::process::Command;
-use std::{env, u8};
+use std::{env};
 
 pub enum CipherError{
     InvalidKeySize,
@@ -22,7 +22,7 @@ pub fn check_openssl_version() -> bool {
         return true;
     }
     eprintln!("No OpenSSL installation found");
-    return false;
+    false
 }
 
 pub fn check_openssl_version_2() -> bool {
@@ -38,7 +38,7 @@ pub fn check_openssl_version_2() -> bool {
         return true;
     }
     eprintln!("No OpenSSL installation found");
-    return false;
+    false
 }
 
 pub fn generate_aes_key(bits: u16) -> Result<Vec<u8>, CipherError> {
